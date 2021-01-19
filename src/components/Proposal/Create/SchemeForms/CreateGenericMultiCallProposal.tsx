@@ -5,6 +5,7 @@ import { ErrorMessage, Field, Form, Formik, FormikProps, FieldArray } from "form
 import Analytics from "lib/analytics";
 import * as React from "react";
 import { connect } from "react-redux";
+import Select, { components } from "react-select";
 import { showNotification, NotificationStatus } from "@store/notifications/notifications.reducer";
 import { baseTokenName, isValidUrl, isAddress, linkToEtherScan, getContractName, toWei, getNetworkByDAOAddress, getArcByDAOAddress, Networks} from "lib/util";
 import { exportUrl, importUrlValues } from "lib/proposalUtils";
@@ -260,6 +261,8 @@ class CreateGenericMultiCallScheme extends React.Component<IProps, IStateProps> 
     const contractsOptions = contracts.map((address, index) => {
       return <option key={index} value={address}>{getContractName(address, this.props.daoAvatarAddress)} ({address})</option>;
     });
+    const ContractsCustomOptions = (props: any) => (<div><components.CustomContactOptions {...props} /></div>)
+
 
     const fnDescription = () => (<span>Short description of the proposal.<ul><li>What are you proposing to do?</li><li>Why is it important?</li><li>How much will it cost the DAO?</li><li>When do you plan to deliver the work?</li></ul></span>);
 
@@ -409,6 +412,7 @@ class CreateGenericMultiCallScheme extends React.Component<IProps, IStateProps> 
                             />
                           </div>
 
+
                           <div>
                             <label htmlFor={`contracts.${index}.address`}>
                               <div className={css.requiredMarker}>*</div>
@@ -428,6 +432,24 @@ class CreateGenericMultiCallScheme extends React.Component<IProps, IStateProps> 
                               </optgroup>
                             </Field>
                           </div>
+
+
+                          <div>
+                            <label htmlFor={`contracts.${index}.address`}>
+                              <div className={css.requiredMarker}>*</div>
+                                Contract Address
+                              <ErrorMessage name={`contracts.${index}.address`}>{(msg) => <span className={css.errorMessage}>{msg}</span>}</ErrorMessage>
+                            </label>
+                            <Select
+                              onChange={async ({value}) => { setFieldValue(`contracts.${index}.address`, value); await this.getContractABI(value, setFieldValue, index, network); }}
+                              options={contracts.map(address => { return { label: `${getContractName(address, this.props.daoAvatarAddress)} (${address})`, value: address}})}
+                              placeholder="-- Choose contract --"
+                              components={{ ContractsCustomOptions }}
+                              formatGroupLabels={() => <div>!!whitelistedContracts.length ? "Whitelisted contracts" : "Custom contracts"</div>}
+                            />
+                          </div>
+
+
 
                           {
                             values.contracts[index].address !== "" &&
